@@ -1,3 +1,7 @@
+// Notes
+//  npx tsc test --outDir ../build  dah by7ot file mo3yn fe folder mo3yn
+// npx tsc  dah by7ot kol el files ele fe folder 3mlo fel configfile "rootDir" fe folder mo3yn 3mlo fl configfile brdo esmo "outDir"
+
 //* primatives types
 //ANCHOR primatives types
 //? basicss
@@ -240,3 +244,33 @@ printSummery(drink);
 /* -------------------------------------------------------------------------- */
 /*                                     end                                    */
 /* -------------------------------------------------------------------------- */
+
+//* classes
+//ANCHOR classes
+
+//public: this method can be called any where any time
+//private: this method can only be called by other methods in this class
+//protected: this method can only be called by other methods in this class or by other methods in child classes
+
+//if we override function in a child clss,it has to have the same modifier
+
+//classes can be used to refere to a type of object, not just creating objects.
+
+/* class User {
+  constructor(
+    public name: string,
+    public location: { lat: number; lng: number }
+  ) {}
+} */
+//or
+/* class User {
+  name: string;
+  location: { lat: number; lng: number };
+  constructor(name: string, location: { lat: number; lng: number }) {
+    this.name = name;
+    this.location = location;
+  }
+} */
+
+// let nady = new User('nady', { lat: 1, lng: 2 });
+// console.log(nady);
