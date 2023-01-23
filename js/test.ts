@@ -185,9 +185,10 @@ const pepsi: Drink =['brown',true,21]
 
 // 1) function return 'any' type.
 // 2) delayed intialization
-// 3) when we want to declare a variable that its type cant be inferred correctly (let user:boolean|string =false)
+// 3) when we want to declare a variable that its type can not be inferred correctly (let user:boolean|string =false)
 // 4) function arguments
 // 5) function returns
+// 5) generics inference
 
 /* -------------------------------------------------------------------------- */
 /*                                     end                                    */
@@ -254,10 +255,10 @@ printSummery(drink);
 //? basics
 
 //public: this method can be called any where any time
-//private: this method can only be called by other methods in this class
 //protected: this method can only be called by other methods in this class or by other methods in child classes
+//private: this method can only be called by other methods in this class
 
-//if we override function in a child clss,it has to have the same modifier
+//if we override function in a child class,it has to have the same modifier
 
 //classes can be used to refere to a type of object, not just creating objects.
 
@@ -272,6 +273,8 @@ printSummery(drink);
 // can contain real implementation for some methods
 //the implemented methods can refer to methods that dont actually exist yet.(we still need to provide names and types for the un-implemented methods)
 //any class that eءtends abstract class has to implement this methods
+
+// It is important to understand that, just like any other aspect of type information, access modifier keywords are only validated at compile time, with no real privacy or security benefits at runtime. This means that even if we mark something as private, if a user decides to set a breakpoint and inspect the code that’s executing at runtime, they’ll still be able to see everything.
 
 /* class User {
   constructor(
@@ -293,6 +296,8 @@ printSummery(drink);
 
 //? Enums
 //used to store closely related values mainly for small data, that are known during the compile time; becuase we cant add or update anything in it after compiling like data from a http request for example.
+//By default, the values in an enum are also given a numeric value starting at 0. However, the numeric value can manually be set to any number explicitly or by calculation.
+//can be mimicked in javascript using object.freeze()
 
 //it just a signale to other engineers that these are closely related values.
 /* enum MatchResult{
@@ -307,7 +312,14 @@ printSummery(drink);
   Draw
 } */
 
-//? generics
+/* -------------------------------------------------------------------------- */
+/*                                     end                                    */
+/* -------------------------------------------------------------------------- */
+
+//* generics
+//ANCHOR generics
+
+//?basics
 //use types as arguments work inside functions.
 //allow us to define the type at the future.
 
@@ -320,6 +332,57 @@ holdNumber.data = 1;
 let holdString = new HoldAnyThing<string>();
 holdString.data = '1'; */
 
+//?generics with functions
+
+/* function printStrings(arr: string[]): void {
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+    console.log(element);
+  }
+}
+function printNumbers(arr: number[]): void {
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+    console.log(element);
+  }
+}
+function printAnything<T>(arr: T[]): void {
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+    console.log(element);
+  }
+}
+
+printAnything(['1', '2', '3']);
+printAnything([1, 2, 3]);
+generics can make type inference, it will replace every T with the type.
+recommended to put type explicitly */
+
+//? generic constrains
+
+/* class Car {
+  print() {
+    console.log('iam a car');
+  }
+}
+class House {
+  print() {
+    console.log('iam a house');
+  }
+}
+
+interface printable {
+  print(): void;
+}
+// T extends printable, means that T must has at least the print function.
+function prtinCarsOrHouses<T extends printable>(arr: T[]): void {
+  for (let i = 0; i < arr.length; i++) {
+    console.log(arr[i].print());
+  }
+}
+prtinCarsOrHouses<House>([new House(), new House(), new House()]);
+prtinCarsOrHouses<Car>([new Car(), new Car(), new Car()]); */
+
 /* -------------------------------------------------------------------------- */
 /*                                     end                                    */
 /* -------------------------------------------------------------------------- */
@@ -329,7 +392,7 @@ holdString.data = '1'; */
 
 //? basics
 //functions that can be used to modify/change different properties/methods inside a class.
-//note the same as javascript decorators.
+//not the same as javascript decorators.
 //used only inside/on classes
 //understanding the order in which decorators are ran, are the key to understand them.
 
@@ -412,3 +475,142 @@ class Boat {
 function classDecorator(constructor: typeof Boat) {
   console.log(constructor);
 } */
+
+//* Bottom type: never
+//ANCHOR Bottom type: never
+/*
+A bottom type (symbol: ⊥) is a type that describes no possible value allowed by the system. To use our set theory mental model, we could describe this as “any value from the following set: { } (intentionally empty)”
+
+?TypeScript provides one bottom type: never.
+
+At first glance, this may appear to be an extremely abstract and pointless concept, but there’s one use case that should convince you otherwise. Let’s take a look at this scenario below.
+
+?Exhaustive conditionals
+Let’s consider the following scenario:
+
+class Car {
+  drive() {
+    console.log("vroom")
+  }
+}
+class Truck {
+  tow() {
+    console.log("dragging something")
+  }
+}
+type Vehicle = Truck | Car
+ 
+let myVehicle: Vehicle = obtainRandomVehicle()
+ 
+// The exhaustive conditional
+if (myVehicle instanceof Truck) {
+  myVehicle.tow() // Truck
+} else if (myVehicle instanceof Car) {
+  myVehicle.drive() // Car
+} else {
+  // NEITHER!
+  const neverValue: never = myVehicle
+}
+Try
+Now, leaving the conditional exactly as-is, let’s add Boat as a vehicle type:
+
+class Car {
+  drive() {
+    console.log("vroom")
+  }
+}
+class Truck {
+  tow() {
+    console.log("dragging something")
+  }
+}
+class Boat {
+  isFloating() {
+    return true
+  }
+}
+type Vehicle = Truck | Car | Boat
+ 
+let myVehicle: Vehicle = obtainRandomVehicle()
+ 
+// The exhaustive conditional
+if (myVehicle instanceof Truck) {
+  myVehicle.tow() // Truck
+} else if (myVehicle instanceof Car) {
+  myVehicle.drive() // Car
+} else {
+  // NEITHER!
+  const neverValue: never = myVehicle
+Type 'Boat' is not assignable to type 'never'.
+}
+Try
+Effectively, what has happened here is that we have been alerted to the fact that a new possibility for Vehicle has been introduced. As a result, we don’t end up with the type for myVehicle as a never in that final else clause.
+
+I recommend handling this a little more gracefully via an error subclass:
+
+class UnreachableError extends Error {
+  constructor(_nvr: never, message: string) {
+    super(message)
+  }
+}
+ 
+// The exhaustive conditional
+if (myVehicle instanceof Truck) {
+  myVehicle.tow() // Truck
+} else if (myVehicle instanceof Car) {
+  myVehicle.drive() // Car
+} else {
+  // NEITHER!
+  throw new UnreachableError(
+    myVehicle,
+Argument of type 'Boat' is not assignable to parameter of type 'never'.
+    `Unexpected vehicle type: ${myVehicle}`
+  )
+}
+Try
+Now, one of three things will happen in that final else block
+
+We will have handled every case before reaching it, and thus we will never enter the final else block
+We will catch upstream code changes that need to be handled in this conditional at compile time (e.g., adding the Boat case)
+If somehow an unexpected value “slip through” and is not caught until we actually run the code, we will get a meaningful error message
+Note that this approach works nicely with a switch statement, when the UnreachableError is thrown from the default case clause.
+*/
+
+// ​‌‌‍‍⁡⁣⁢⁢‍react ts
+// https://fem-react-typescript.vercel.app/
+
+// ⁡⁢⁢⁡⁢⁢⁢Type template literals⁡
+/* type User = {
+  name: string;
+  age: number;
+};
+
+type ActionTypes = `update-${keyof User}`;
+
+type Actions<T, K extends keyof T & string> = {
+  type: `update-${K}`;
+  payload: T[K];
+};
+
+type UpdateNameAction = Actions<User, 'name'>; 
+*/
+
+/* type CharacterClass = "warror" | "paladin" | "wizard" | "cleric";
+
+type LawChaos = "lawful" | "neutral" | "chaotic";
+type GoodEvil = "good" | "neutral" | "evil";
+
+type Alignment = `${LawChaos}-${GoodEvil}`;
+
+type Character = {
+  name: string;
+  profession: CharacterClass;
+  alignment: Alignment;
+};
+
+const steve: Character = {
+  name: "Steve",
+  profession: "wizard",
+  alignment: "chaotic-good",
+}; 
+*/
